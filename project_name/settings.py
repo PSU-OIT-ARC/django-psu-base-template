@@ -18,7 +18,7 @@ encryptor = Encryptor()
 # -------------------------------------------------------------------------
 # Application Metadata
 # -------------------------------------------------------------------------
-# The current version of the DEMO application
+# The current version of the {{ project_name }} application
 APP_VERSION = '0.0.1'
 
 # App identifiers
