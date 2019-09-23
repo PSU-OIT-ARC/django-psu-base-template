@@ -228,6 +228,7 @@ LOGGING = {
 CAS_APPLY_ATTRIBUTES_TO_USER = True
 CAS_CREATE_USER = True
 CAS_IGNORE_REFERER = True
+CAS_LOGIN_MSG = None
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'django_cas_ng.backends.CASBackend',
