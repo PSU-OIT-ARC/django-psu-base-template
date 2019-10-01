@@ -1,2 +1,2 @@
-Django>=2.2.4
+Django>=2.1.12
 psu-base>=0.4.3

@@ -87,6 +87,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries':{
+                '{{ project_name }}_taglib': '{{ project_name }}.templatetags.{{ project_name }}_taglib',
+            }
         },
     },
 ]
@@ -95,12 +98,24 @@ WSGI_APPLICATION = '{{ project_name }}.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
-}
+if os.path.isfile('apc/local_settings.py'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        },
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
+    }
 
 # For caching things (like database results)
 CACHES = {
@@ -184,22 +199,6 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.NullHandler',
         },
-        'logfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': "logs/{{ project_name }}",
-            'maxBytes': 50000,
-            'backupCount': 2,
-            'formatter': 'standard',
-        },
-        'dbfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': "logs/{{ project_name }}-backend",
-            'maxBytes': 50000,
-            'backupCount': 2,
-            'formatter': 'standard',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -208,17 +207,17 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console'],
             'propagate': True,
             'level': 'WARN',
         },
         'django.db.backends': {
-            'handlers': ['dbfile'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': False,
         },
         'psu': {
-            'handlers': ['console', 'logfile'],
+            'handlers': ['console'],
             'level': 'DEBUG',
         },
     }
@@ -263,4 +262,15 @@ LOGIN_URL = 'cas:login'
 CAS_SERVER_URL = 'https://sso.oit.pdx.edu/idp/profile/cas/login'
 
 # Override settings with values for the local environment
-from .local_settings import *
+if os.path.isfile('apc/local_settings.py'):
+    from .local_settings import *
+
+# In AWS (Elastic Beanstalk), values will be in environment variables
+else:
+    ENVIRONMENT = os.environ.get('ENVIRONMENT', 'TEST')
+    ALLOWED_HOSTS = [os.environ.get('HOST_NAME', 'localhost'), 'localhost']
+    CAS_SERVER_URL = os.environ.get('CAS_SERVER_URL', 'https://sso.oit.pdx.edu/idp/profile/cas/login')
+    DEBUG = str(os.environ.get('DEBUG', 'False')).lower() == 'true'
+    SECRET_KEY = os.environ.get('SECRET_KEY', None)
+    FINTI_URL = os.environ.get('FINTI_URL', 'https://ws-test.oit.pdx.edu')
+    FINTI_TOKEN = os.environ.get('FINTI_TOKEN', None)

@@ -1,0 +1,17 @@
+{% extends 'psu_base.html' %}
+{% load base_taglib %}
+{% load {{project_name}}_taglib %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome!</title>
+</head>
+<body>
+{% block pagecontent %}
+    <h1>Welcome!</h1>
+    {%sample_tag%}
+
+{%endblock%}
+</body>
+</html>
