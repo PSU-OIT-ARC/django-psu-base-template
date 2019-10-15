@@ -98,7 +98,7 @@ WSGI_APPLICATION = '{{ project_name }}.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#databases
-if os.path.isfile('apc/local_settings.py'):
+if os.path.isfile('{{ project_name }}/local_settings.py'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -262,7 +262,7 @@ LOGIN_URL = 'cas:login'
 CAS_SERVER_URL = 'https://sso.oit.pdx.edu/idp/profile/cas/login'
 
 # Override settings with values for the local environment
-if os.path.isfile('apc/local_settings.py'):
+if os.path.isfile('{{ project_name }}/local_settings.py'):
     from .local_settings import *
 
 # In AWS (Elastic Beanstalk), values will be in environment variables
