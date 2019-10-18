@@ -29,6 +29,10 @@ APP_NAME = 'The {{ project_name }} Site'  # Displayed in some generic UI scenari
 #   i.e. https://app.banner.pdx.edu/{{ project_name }}/index
 # AWS apps will not have this (set to None)
 URL_CONTEXT = '{{ project_name }}'
+
+# I needed this in APC, but it caused issues in the demo site.
+# APPEND_SLASH = False
+
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 
@@ -61,6 +65,7 @@ INSTALLED_APPS = [
     'django_cas_ng',
     'crequest',
     'psu_base',
+    'sass_processor',
 ]
 
 MIDDLEWARE = [
@@ -106,6 +111,7 @@ if os.path.isfile('{{ project_name }}/local_settings.py'):
         },
     }
 else:
+    # AWS Database
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -159,7 +165,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/{{ docs_version }}/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# SASS (https://github.com/jrief/django-sass-processor)
+SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, 'sass_build')
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'sass_processor.finders.CssFinder',
+]
+SASS_PROCESSOR_AUTO_INCLUDE = True  # App specific static folders are added to the libsass include dirs
+SASS_PROCESSOR_INCLUDE_FILE_PATTERN = r'^.+\.scss$'
+SASS_PRECISION = 8
+
+SASS_PROCESSOR_CUSTOM_FUNCTIONS = {
+    'get-color': 'psu_base.services.template_service.get_sass_color',
+    'get-string': 'psu_base.services.template_service.get_sass_string',
+}
 
 # #########################################################################
 # PSU Base Plugin Settings
@@ -261,15 +283,32 @@ LOGIN_URL = 'cas:login'
 # May be overwritten in local_settings (i.e. to use sso.stage):
 CAS_SERVER_URL = 'https://sso.oit.pdx.edu/idp/profile/cas/login'
 
+# Get SASS Variables
+if os.path.isfile('{{ project_name }}/sass_variables.py'):
+    from .sass_variables import *
+
 # Override settings with values for the local environment
 if os.path.isfile('{{ project_name }}/local_settings.py'):
     from .local_settings import *
 
 # In AWS (Elastic Beanstalk), values will be in environment variables
 else:
-    ENVIRONMENT = os.environ.get('ENVIRONMENT', 'TEST')
-    ALLOWED_HOSTS = [os.environ.get('HOST_NAME', 'localhost'), 'localhost']
-    CAS_SERVER_URL = os.environ.get('CAS_SERVER_URL', 'https://sso.oit.pdx.edu/idp/profile/cas/login')
+    HOST_NAME = os.environ.get('HOST_NAME', 'localhost')
+    HOST_IP = os.environ.get('HOST_IP')
+    HOST_URL = os.environ.get('HOST_URL')
+
+    # https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # SECURE_SSL_REDIRECT = True
+    # SECURE_SSL_HOST = f"https://{HOST_URL}"
+
+    # https://docs.djangoproject.com/en/2.2/ref/middleware/#http-strict-transport-security
+    # SECURE_HSTS_SECONDS = 31536000  # One Year
+
+    ALLOWED_HOSTS = ['localhost', HOST_NAME, HOST_IP, HOST_URL]
+    ENVIRONMENT = os.environ.get('ENVIRONMENT', 'DEV')
+    CAS_SERVER_URL = os.environ.get('CAS_SERVER_URL', 'https://sso-stage.oit.pdx.edu/idp/profile/cas/login')
     DEBUG = str(os.environ.get('DEBUG', 'False')).lower() == 'true'
     SECRET_KEY = os.environ.get('SECRET_KEY', None)
     FINTI_URL = os.environ.get('FINTI_URL', 'https://ws-test.oit.pdx.edu')
