@@ -91,6 +91,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'psu_base.context_processors.auth',
+                'psu_base.context_processors.util'
             ],
             'libraries':{
                 '{{ project_name }}_taglib': '{{ project_name }}.templatetags.{{ project_name }}_taglib',
