@@ -176,6 +176,10 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'sass_processor.finders.CssFinder',
 ]
+
+SASS_PROCESSOR_INCLUDE_DIRS = [
+    os.path.join('{{ project_name }}', 'static', 'css'),
+]
 SASS_PROCESSOR_AUTO_INCLUDE = True  # App specific static folders are added to the libsass include dirs
 SASS_PROCESSOR_INCLUDE_FILE_PATTERN = r'^.+\.scss$'
 SASS_PRECISION = 8
