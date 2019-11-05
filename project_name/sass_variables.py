@@ -13,6 +13,15 @@ HEADING_COLOR = None
 TEXT_COLOR = None
 CODE_COLOR = None
 
+# PSU Logo will be automatically filtered to match the primary_fg_color (if other than the default; white)
+# This JS processing can be avoided by pasting the resulting css filter here (get it by inspecting the filtered logo)
+# This may also be set to "none" (as a string) to leave the logo as white when non-white text was specified
+PSU_LOGO_FILTER = None
+
+# Navigation tabs should be white, unless it conflicts with other color definitions
+ACTIVE_TAB_BG_COLOR = None              # white
+ACTIVE_TAB_FG_COLOR = None              # primary bg color
+
 # By default, primary and default (i.e. btn-primary, btn-default) colors are based on primary bg and fg colors above
 # Depending on what you selected, the default variations of them may look awful!
 BOOTSTRAP_PRIMARY = None                # psu-green
