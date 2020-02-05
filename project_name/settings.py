@@ -30,6 +30,9 @@ APP_NAME = 'The {{ project_name }} Site'  # Displayed in some generic UI scenari
 # AWS apps will not have this (set to None)
 URL_CONTEXT = '{{ project_name }}'
 
+# When no local_settings.py file exists, assume running in AWS
+is_aws = not os.path.isfile('jsonWebToken/local_settings.py')
+
 # I needed this in APC, but it caused issues in the demo site.
 # APPEND_SLASH = False
 
@@ -105,14 +108,7 @@ WSGI_APPLICATION = '{{ project_name }}.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#databases
-if os.path.isfile('{{ project_name }}/local_settings.py'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        },
-    }
-else:
+if is_aws:
     # AWS Database
     DATABASES = {
         'default': {
@@ -123,6 +119,13 @@ else:
             'HOST': os.environ['RDS_HOSTNAME'],
             'PORT': os.environ['RDS_PORT'],
         }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        },
     }
 
 # For caching things (like database results)
@@ -212,50 +215,92 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
+if (not is_aws) and (not os.path.isdir('logs')):
+    os.mkdir('logs')
+
 # Logging Settings
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'standard': {
-            'format': "[%(asctime)s] %(levelname)s %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
+if is_aws:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+        'formatters': {
+            'standard': {
+                'format': "[%(asctime)s] %(levelname)s %(message)s",
+                'datefmt': "%d/%b/%Y %H:%M:%S"
+            },
         },
-    },
-    'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'logging.NullHandler',
+        'handlers': {
+            'null': {
+                'level': 'DEBUG',
+                'class': 'logging.NullHandler',
+            },
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'standard'
+            },
         },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '{{ project_name }}.log',
-            'formatter': 'standard'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'propagate': True,
-            'level': 'WARN',
-        },
-        'django.db.backends': {
-            'handlers': ['console', 'file'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'psu': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'propagate': True,
+                'level': 'WARN',
+            },
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
+            'psu': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
+        }
     }
-}
+else:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+        'formatters': {
+            'standard': {
+                'format': "[%(asctime)s] %(levelname)s %(message)s",
+                'datefmt': "%d/%b/%Y %H:%M:%S"
+            },
+        },
+        'handlers': {
+            'null': {
+                'level': 'DEBUG',
+                'class': 'logging.NullHandler',
+            },
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'standard'
+            },
+            'file': {
+                'level': 'DEBUG',
+                'class': 'logging.FileHandler',
+                'filename': '{{ project_name }}.log',
+                'formatter': 'standard'
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'file'],
+                'propagate': True,
+                'level': 'WARN',
+            },
+            'django.db.backends': {
+                'handlers': ['console', 'file'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
+            'psu': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG',
+            },
+        }
+    }
 
 # SSO SETTINGS
 CAS_APPLY_ATTRIBUTES_TO_USER = True
@@ -299,12 +344,8 @@ CAS_SERVER_URL = 'https://sso.oit.pdx.edu/idp/profile/cas/login'
 if os.path.isfile('{{ project_name }}/sass_variables.py'):
     from .sass_variables import *
 
-# Override settings with values for the local environment
-if os.path.isfile('{{ project_name }}/local_settings.py'):
-    from .local_settings import *
-
 # In AWS (Elastic Beanstalk), values will be in environment variables
-else:
+if is_aws:
     HOST_NAME = os.environ.get('HOST_NAME', 'localhost')
     HOST_IP = os.environ.get('HOST_IP')
     HOST_URL = os.environ.get('HOST_URL')
@@ -318,10 +359,14 @@ else:
     # https://docs.djangoproject.com/en/2.2/ref/middleware/#http-strict-transport-security
     # SECURE_HSTS_SECONDS = 31536000  # One Year
 
-    ALLOWED_HOSTS = ['localhost', HOST_NAME, HOST_IP, HOST_URL]
+    ALLOWED_HOSTS = ['*', 'localhost', HOST_NAME, HOST_IP, HOST_URL]
     ENVIRONMENT = os.environ.get('ENVIRONMENT', 'DEV')
     CAS_SERVER_URL = os.environ.get('CAS_SERVER_URL', 'https://sso-stage.oit.pdx.edu/idp/profile/cas/login')
     DEBUG = str(os.environ.get('DEBUG', 'False')).lower() == 'true'
-    SECRET_KEY = os.environ.get('SECRET_KEY', None)
+    SECRET_KEY = os.environ.get('SECRET_KEY', '{{ secret_key }}')
     FINTI_URL = os.environ.get('FINTI_URL', 'https://ws-test.oit.pdx.edu')
     FINTI_TOKEN = os.environ.get('FINTI_TOKEN', None)
+
+# Otherwise, override settings with values from local_settings.py
+else:
+    from .local_settings import *
