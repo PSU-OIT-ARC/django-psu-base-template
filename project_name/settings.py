@@ -28,7 +28,7 @@ APP_NAME = 'The {{ project_name }} Site'  # Displayed in some generic UI scenari
 # On-premises apps will have additional "context" appended to the URL
 #   i.e. https://app.banner.pdx.edu/{{ project_name }}/index
 # AWS apps will not have this (set to None)
-URL_CONTEXT = '{{ project_name }}'
+URL_CONTEXT = None  # for on-premises, use: '{{ project_name }}'
 
 # When no local_settings.py file exists, assume running in AWS
 is_aws = not os.path.isfile('jsonWebToken/local_settings.py')
@@ -280,7 +280,7 @@ else:
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.FileHandler',
-                'filename': '{{ project_name }}.log',
+                'filename': 'logs/{{ project_name }}.log',
                 'formatter': 'standard'
             },
         },
@@ -349,6 +349,12 @@ if is_aws:
     HOST_NAME = os.environ.get('HOST_NAME', 'localhost')
     HOST_IP = os.environ.get('HOST_IP')
     HOST_URL = os.environ.get('HOST_URL')
+
+    # This forces the CAS redirect to use SSL. Required when deployed in AWS.
+    CAS_ROOT_PROXIED_AS = 'https://' + HOST_URL
+
+    # Do not attempt to compile SASS in AWS (permission errors)
+    SASS_PROCESSOR_ENABLED = False
 
     # https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https
     SESSION_COOKIE_SECURE = True
