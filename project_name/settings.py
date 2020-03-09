@@ -336,6 +336,8 @@ PSU_PUBLIC_URLS = ['.*/psu/test', '.*/accounts/login']
 # CAS will return users to the root of the application
 CAS_REDIRECT_URL = f'/{URL_CONTEXT if URL_CONTEXT else ""}'
 LOGIN_URL = 'cas:login'
+CAS_FORCE_SSL_SERVICE_URL = True
+SECURE_PROXY_SSL_HEADER = ('HTTP X FORWARDED PROTO', 'https')
 
 # May be overwritten in local_settings (i.e. to use sso.stage):
 CAS_SERVER_URL = 'https://sso.oit.pdx.edu/idp/profile/cas/login'
