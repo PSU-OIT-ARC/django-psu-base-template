@@ -31,7 +31,7 @@ APP_NAME = 'The {{ project_name }} Site'  # Displayed in some generic UI scenari
 URL_CONTEXT = None  # for on-premises, use: '{{ project_name }}'
 
 # When no local_settings.py file exists, assume running in AWS
-is_aws = not os.path.isfile('jsonWebToken/local_settings.py')
+is_aws = not os.path.isfile('{{ project_name }}/local_settings.py')
 
 # I needed this in APC, but it caused issues in the demo site.
 # APPEND_SLASH = False
