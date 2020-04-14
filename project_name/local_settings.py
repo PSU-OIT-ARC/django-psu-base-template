@@ -19,17 +19,18 @@ CAS_SERVER_URL = 'https://sso-stage.oit.pdx.edu/idp/profile/cas/login'
 # `````````````````
 # FINTI
 # `````````````````
-# If you have the "PSU Key" file, Finti will be configured to access the test server.
-# You MUST provide real Finti URL and token for access to your APIs
+# REQUIRED: Finti URL and Token (uncomment these):
+# FINTI_TOKEN = '<< put your Finti token here >>'
+# FINTI_URL = 'https://ws-test.oit.pdx.edu'
+
 # Finti URLs (for reference)
 # -  http://localhost:8888
 # -  https://ws-test.oit.pdx.edu
 # -  https://ws.oit.pdx.edu
 
-# REQUIRED: Finti URL and Token (uncomment these):
-# FINTI_TOKEN = '<< put your Finti token here >>'
-# FINTI_URL = 'https://ws-test.oit.pdx.edu'
-
+# As-of psu-base 0.11.0, Finti responses can be cached for offline development
+# FINTI_SIMULATE_CALLS = False    # Simulate Finti calls (i.e. when not on VPN)
+# FINTI_SAVE_RESPONSES = False    # Save/record actual Finti responses for offline use?
 
 # -----------------------------------------------------------------------------
 # OPTIONAL VALUES

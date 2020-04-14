@@ -9,13 +9,14 @@
 
             {### YOUR NAVIGATION TABS GO HERE. (Samples provided below) ###}
             {% header_nav_tab url="/" label="Home" icon="fa-home" icon_only=True %}
-            {% header_nav_tab url="psu:test" label="Status" %}
-            {% header_nav_tab url="psu:finti" label="Finti Console" optional=True %}
+            {% header_nav_tab url="psu:test" label="Status" authorities="DynamicPowerUser" %}
+            {% header_nav_tab url="psu:finti" label="Finti Console" optional=True authorities="developer" feature="finti_console" %}
 
             {### DEVELOPER MENU ###}
-            <li class="nav-item header-nav-item developer-nav-tab">
-                {# You may override the developer menu items by copying the template into your project #}
-                {% include '_components/header/developer_menu.html' %}
+            <li class="nav-item header-nav-item">
+                {# You may add links to the admin menu by defining them in your app's __inti__ file #}
+                {# You may override the admin menu content by copying the template into your project #}
+                {% include '_components/header/admin_menu.html' %}
             </li>
         </ul>
     </div>
