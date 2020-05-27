@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'crequest',
     'psu_base',
     'sass_processor',
+    # This app:
+    '{{ project_name }}',
 ]
 
 MIDDLEWARE = [
@@ -107,11 +109,11 @@ if is_aws:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
+            'NAME': os.environ.get('RDS_DB_NAME', 'eb'),
+            'USER': os.environ.get('RDS_USERNAME'),
+            'PASSWORD': os.environ.get('RDS_PASSWORD'),
+            'HOST': os.environ.get('RDS_HOSTNAME'),
+            'PORT': os.environ.get('RDS_PORT'),
         }
     }
 else:
@@ -152,14 +154,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/{{ docs_version }}/topics/i18n/
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
-USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/{{ docs_version }}/howto/static-files/
@@ -196,6 +194,7 @@ CENTRALIZED_PROD = 'https://content.oit.pdx.edu'
 
 # Set Timezone
 TIME_ZONE = 'America/Vancouver'
+USE_TZ = False
 
 # Message classes
 MESSAGE_TAGS = {
@@ -205,6 +204,7 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+FLASH_MESSAGE_POSITION = 'TOP'   # TOP, BOTTOM
 
 if (not is_aws) and (not os.path.isdir('logs')):
     os.mkdir('logs')
@@ -305,7 +305,10 @@ AUTHENTICATION_BACKENDS = (
 
 # EMAIL SETTINGS
 EMAIL_HOST = 'mailhost.pdx.edu'
-EMAIL_PORT = 25
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = None      # Add to local_settings.py
+EMAIL_HOST_PASSWORD = None  # Add to local_settings.py
 EMAIL_SENDER = 'noreply@pdx.edu'
 
 # Session expiration
@@ -363,6 +366,10 @@ if is_aws:
     SECRET_KEY = os.environ.get('SECRET_KEY', '{{ secret_key }}')
     FINTI_URL = os.environ.get('FINTI_URL', 'https://ws-test.oit.pdx.edu')
     FINTI_TOKEN = os.environ.get('FINTI_TOKEN', None)
+
+    # Email Settings
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', None)
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
 
 # Otherwise, override settings with values from local_settings.py
 else:
