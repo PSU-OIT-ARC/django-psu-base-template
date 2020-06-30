@@ -39,8 +39,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # For local development, Finti responses can be stored in SQLite for simulated Finti calls
 # Override these in local_settings.py
-FINTI_SIMULATE_CALLS = False    # Simulate Finti calls (i.e. when not on VPN)
-FINTI_SAVE_RESPONSES = False    # Save/record actual Finti responses for offline use?
+FINTI_SAVE_RESPONSES = False            # Save/record actual Finti responses for offline use?
+FINTI_SIMULATE_CALLS = False            # Simulate Finti calls. 404 if response not previously saved.
+FINTI_SIMULATE_WHEN_POSSIBLE = False    # Simulate Finti calls only when cached response exists.
 
 # SECURITY WARNING: Overwrite this key in local_settings.py for production!
 SECRET_KEY = '{{ secret_key }}'
@@ -154,7 +155,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/{{ docs_version }}/topics/i18n/
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Vancouver'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = False
@@ -191,10 +192,6 @@ SASS_PROCESSOR_CUSTOM_FUNCTIONS = {
 # PSU Centralized Repository
 CENTRALIZED_NONPROD = 'https://content.oit.pdx.edu/nonprod'
 CENTRALIZED_PROD = 'https://content.oit.pdx.edu'
-
-# Set Timezone
-TIME_ZONE = 'America/Vancouver'
-USE_TZ = False
 
 # Message classes
 MESSAGE_TAGS = {
@@ -353,11 +350,6 @@ if is_aws:
     # https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # SECURE_SSL_REDIRECT = True
-    # SECURE_SSL_HOST = f"https://{HOST_URL}"
-
-    # https://docs.djangoproject.com/en/2.2/ref/middleware/#http-strict-transport-security
-    # SECURE_HSTS_SECONDS = 31536000  # One Year
 
     ALLOWED_HOSTS = ['*', 'localhost', HOST_NAME, HOST_IP, HOST_URL]
     ENVIRONMENT = os.environ.get('ENVIRONMENT', 'DEV')

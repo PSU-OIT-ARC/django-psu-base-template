@@ -33,6 +33,10 @@ CAS_SERVER_URL = 'https://sso-stage.oit.pdx.edu/idp/profile/cas/login'
 # FINTI_SIMULATE_WHEN_POSSIBLE = False  # Use cached calls when possible, call Finti when not cached
 # FINTI_SAVE_RESPONSES = False          # Save/record actual Finti responses for offline use?
 
+# Required for sending email:
+# EMAIL_HOST_PASSWORD = '<< put the email password here >>'
+# EMAIL_HOST_USER = '<< put the email user here >>'
+
 # -----------------------------------------------------------------------------
 # OPTIONAL VALUES
 # -----------------------------------------------------------------------------

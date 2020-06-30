@@ -1,2 +1,2 @@
 Django>=2.1.12,<3.0
-psu-base>=0.17.2
+psu-base>=0.18.3
