@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 """
 import os
 from django.contrib.messages import constants as messages
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # -------------------------------------------------------------------------
 # Application Metadata
@@ -362,6 +364,53 @@ if is_aws:
     # Email Settings
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', None)
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
+
+    # Sentry log and performance monitoring
+    USE_SENTRY = str(os.environ.get('USE_SENTRY', 'True')).lower() == 'true'
+    if USE_SENTRY:
+        # Prevent [POSTED] log messages from creating issues in Sentry
+        # ----------------------------------------------------------------------
+        def ignore_posted_messages(event, hint):
+            ignore = logged_msg = browser = None
+
+            # Get the log message that caused this event
+            if 'log_record' in hint and hasattr(hint['log_record'], 'msg'):
+                logged_msg = hint['log_record'].msg
+            if (not logged_msg) and 'logentry' in event and 'message' in event['logentry']:
+                logged_msg = event['logentry']['message']
+
+            # Get the browser (was this an AWS health check?)
+            if 'request' in event and 'headers' in event['request'] and 'User-Agent' in event['request']['headers']:
+                browser = event['request']['headers']['User-Agent']
+            is_health_check = browser and 'ELB-HealthChecker' in browser
+
+            # Ignore POSTED errors (i.e. "You forgot to enter this required field...")
+            ignore = logged_msg and '[POSTED]' in logged_msg
+
+            return None if ignore else event
+        # ----------------------------------------------------------------------
+
+        # To which project should data be sent
+        psu_base_dsn = 'https://ddc37feb8671440a81c31c9e3eea4b36@o50547.ingest.sentry.io/5553836'
+        SENTRY_DSN = os.environ.get('SENTRY_DSN', psu_base_dsn)
+
+        # Determine environment name
+        if SENTRY_DSN == psu_base_dsn:
+            # Using generic project, include app code in environment
+            sentry_env = f"{APP_CODE}-{ENVIRONMENT}".lower()
+        else:
+            # Using app-specific project, so app code not needed
+            sentry_env = ENVIRONMENT.lower()
+
+        sentry_sdk.init(
+            environment=sentry_env,
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', 1.0)),
+            before_send=ignore_posted_messages,
+            # If you wish to associate users to errors you may enable sending PII data.
+            send_default_pii=str(os.environ.get('SENTRY_PII', 'True')).lower() == 'true'
+        )
 
 # Otherwise, override settings with values from local_settings.py
 else:
