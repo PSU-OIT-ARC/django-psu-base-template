@@ -203,7 +203,7 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
-FLASH_MESSAGE_POSITION = 'TOP'   # TOP, BOTTOM
+FLASH_MESSAGE_POSITION = 'BOTTOM'   # TOP, BOTTOM
 
 if (not is_aws) and (not os.path.isdir('logs')):
     os.mkdir('logs')
@@ -319,6 +319,7 @@ REQUIRE_LOGIN = True
 # List of URLs in your app that should be excluded from global authentication requirement
 # By default, the root (landing page) is public
 APP_PUBLIC_URLS = ['^/$']
+
 # If deployed on-prem, root URL will contain additional context:
 if URL_CONTEXT:
     APP_PUBLIC_URLS.append(f'^/{URL_CONTEXT}/?$')
