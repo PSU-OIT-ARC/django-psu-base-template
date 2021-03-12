@@ -11,6 +11,7 @@ import os
 from django.contrib.messages import constants as messages
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from pathlib import Path
 
 # -------------------------------------------------------------------------
 # Application Metadata
@@ -36,8 +37,8 @@ is_aws = not os.path.isfile('{{ project_name }}/local_settings.py')
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # For local development, Finti responses can be stored in SQLite for simulated Finti calls
 # Override these in local_settings.py
@@ -111,7 +112,7 @@ if is_aws:
     # AWS Database
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.environ.get('RDS_DB_NAME', 'eb'),
             'USER': os.environ.get('RDS_USERNAME'),
             'PASSWORD': os.environ.get('RDS_PASSWORD'),
