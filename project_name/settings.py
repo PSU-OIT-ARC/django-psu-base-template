@@ -128,6 +128,8 @@ else:
         },
     }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # For caching things (like database results)
 CACHES = {
     'default': {
@@ -325,9 +327,6 @@ APP_PUBLIC_URLS = ['^/$']
 if URL_CONTEXT:
     APP_PUBLIC_URLS.append(f'^/{URL_CONTEXT}/?$')
 
-# Some PSU Base paths must be public:
-PSU_PUBLIC_URLS = ['.*/psu/test', '.*/accounts/login']
-
 # CAS will return users to the root of the application
 CAS_REDIRECT_URL = f'/{URL_CONTEXT if URL_CONTEXT else ""}'
 LOGIN_URL = 'cas:login'
@@ -352,8 +351,13 @@ if is_aws:
     SASS_PROCESSOR_ENABLED = False
 
     # https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+    # https://docs.djangoproject.com/en/2.2/ref/middleware/#http-strict-transport-security
+    SECURE_HSTS_SECONDS = 31536000  # One Year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
     ALLOWED_HOSTS = ['*', 'localhost', HOST_NAME, HOST_IP, HOST_URL]
     ENVIRONMENT = os.environ.get('ENVIRONMENT', 'DEV')
@@ -370,6 +374,29 @@ if is_aws:
     # Sentry log and performance monitoring
     USE_SENTRY = str(os.environ.get('USE_SENTRY', 'True')).lower() == 'true'
     if USE_SENTRY:
+        # Limit performance logging on health-check endpoints
+        # ----------------------------------------------------------------------
+        def traces_sampler(sampling_context):
+            exclusions = ['/psu/test', '/scheduler/run']
+            if URL_CONTEXT:
+                exclusions = [f'/{URL_CONTEXT}{ep}' for ep in exclusions]
+
+            default_rate = float(os.environ.get('SENTRY_SAMPLE_RATE', 0.1 if ENVIRONMENT == 'PROD' else 0.0))
+            chosen_rate = default_rate
+            try:
+                if sampling_context and sampling_context["parent_sampled"] is not None:
+                    return sampling_context["parent_sampled"]
+
+                path_info = sampling_context["wsgi_environ"].get(
+                    'PATH_INFO') if "wsgi_environ" in sampling_context else None
+                if path_info:
+                    chosen_rate = 0 if path_info in exclusions else default_rate
+            except Exception as ee:
+                print(f"Sampling context error: {ee}")
+
+            return chosen_rate
+        # ----------------------------------------------------------------------
+
         # Prevent [POSTED] log messages from creating issues in Sentry
         # ----------------------------------------------------------------------
         def ignore_posted_messages(event, hint):
@@ -387,7 +414,7 @@ if is_aws:
             is_health_check = browser and 'ELB-HealthChecker' in browser
 
             # Ignore POSTED errors (i.e. "You forgot to enter this required field...")
-            ignore = logged_msg and '[POSTED]' in logged_msg
+            ignore = logged_msg and ('[POSTED]' in logged_msg or '[DUPLICATE]' in logged_msg)
 
             return None if ignore else event
         # ----------------------------------------------------------------------
@@ -404,11 +431,15 @@ if is_aws:
             # Using app-specific project, so app code not needed
             sentry_env = ENVIRONMENT.lower()
 
+        # Default Sampling Rate
+        default_sample_rate = 0.01 if ENVIRONMENT == 'PROD' else 0.0
+        default_sample_rate = 0.0
+
         sentry_sdk.init(
             environment=sentry_env,
             dsn=SENTRY_DSN,
             integrations=[DjangoIntegration()],
-            traces_sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', 1.0)),
+            traces_sample_rate=float(os.environ.get('SENTRY_SAMPLE_RATE', default_sample_rate)),
             before_send=ignore_posted_messages,
             # If you wish to associate users to errors you may enable sending PII data.
             send_default_pii=str(os.environ.get('SENTRY_PII', 'True')).lower() == 'true'
