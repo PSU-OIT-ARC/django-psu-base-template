@@ -19,30 +19,27 @@ CODE_COLOR = None
 PSU_LOGO_FILTER = None
 
 # Navigation tabs should be white, unless it conflicts with other color definitions
-ACTIVE_TAB_BG_COLOR = None              # white
-ACTIVE_TAB_FG_COLOR = None              # primary bg color
+ACTIVE_TAB_BG_COLOR = None  # white
+ACTIVE_TAB_FG_COLOR = None  # primary bg color
 
 # By default, primary and default (i.e. btn-primary, btn-default) colors are based on primary bg and fg colors above
 # Depending on what you selected, the default variations of them may look awful!
-BOOTSTRAP_PRIMARY = None                # psu-green
-BOOTSTRAP_PRIMARY_COMPLIMENT = None     # white
-BOOTSTRAP_DEFAULT = None                # psu-gray
-BOOTSTRAP_DEFAULT_COMPLIMENT = None     # white
+BOOTSTRAP_PRIMARY = None  # psu-green
+BOOTSTRAP_PRIMARY_COMPLIMENT = None  # white
+BOOTSTRAP_DEFAULT = None  # psu-gray
+BOOTSTRAP_DEFAULT_COMPLIMENT = None  # white
 
 # Standard danger, warning, etc colors
-BOOTSTRAP_DANGER = None                 # psu-red
-BOOTSTRAP_DANGER_COMPLIMENT = None      # white
-BOOTSTRAP_WARNING = None                # psu-orange (yellowish)
-BOOTSTRAP_WARNING_COMPLIMENT = None     # psu-brown
-BOOTSTRAP_INFO = None                   # psu-blue
-BOOTSTRAP_INFO_COMPLIMENT = None        # white
-BOOTSTRAP_SUCCESS = None                # psu-accent-green
-BOOTSTRAP_SUCCESS_COMPLIMENT = None     # white
+BOOTSTRAP_DANGER = None  # psu-red
+BOOTSTRAP_DANGER_COMPLIMENT = None  # white
+BOOTSTRAP_WARNING = None  # psu-orange (yellowish)
+BOOTSTRAP_WARNING_COMPLIMENT = None  # psu-brown
+BOOTSTRAP_INFO = None  # psu-blue
+BOOTSTRAP_INFO_COMPLIMENT = None  # white
+BOOTSTRAP_SUCCESS = None  # psu-accent-green
+BOOTSTRAP_SUCCESS_COMPLIMENT = None  # white
 
 # ---- FONTS ----
 HEADING_FONT = None
 TEXT_FONT = None
 CODE_FONT = None
-
-
-
