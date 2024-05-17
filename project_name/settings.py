@@ -131,7 +131,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # For caching things (like database results)
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "127.0.0.1:11211",
     }
 }
@@ -366,7 +366,7 @@ if is_aws:
     )
     DEBUG = str(os.environ.get("DEBUG", "False")).lower() == "true"
     SECRET_KEY = os.environ.get("SECRET_KEY", "{{ secret_key }}")
-    FINTI_URL = os.environ.get("FINTI_URL", "https://ws-test.oit.pdx.edu")
+    FINTI_URL = os.environ.get("FINTI_URL", "https://sf-stage.oit.pdx.edu")
     FINTI_TOKEN = os.environ.get("FINTI_TOKEN", None)
 
     # Email Settings
