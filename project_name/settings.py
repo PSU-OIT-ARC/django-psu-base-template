@@ -198,6 +198,8 @@ SASS_PROCESSOR_CUSTOM_FUNCTIONS = {
 CENTRALIZED_NONPROD = "https://content.oit.pdx.edu/nonprod"
 CENTRALIZED_PROD = "https://content.oit.pdx.edu"
 
+ICON_PROVIDER = "BOOTSTRAP_ICONS"  # "FONT_AWESOME"
+
 # Message classes
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-info",
