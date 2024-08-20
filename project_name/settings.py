@@ -342,12 +342,17 @@ if os.path.isfile("{{ project_name }}/sass_variables.py"):
 
 # In AWS (Elastic Beanstalk), values will be in environment variables
 if is_aws:
+
+    # If this is not actually an AWS instance, print an error message (but continue)
+    if "us-west" not in str(os.environ.get('HOSTNAME')):
+        print("\nERROR: Missing local_settings.py\n")
+
     HOST_NAME = os.environ.get("HOST_NAME", "localhost")
     HOST_IP = os.environ.get("HOST_IP")
     HOST_URL = os.environ.get("HOST_URL")
 
     # This forces the CAS redirect to use SSL. Required when deployed in AWS.
-    CAS_ROOT_PROXIED_AS = "https://" + HOST_URL
+    CAS_ROOT_PROXIED_AS = f"https://{HOST_URL}"
 
     # Do not attempt to compile SASS in AWS (permission errors)
     SASS_PROCESSOR_ENABLED = False
