@@ -1,22 +1,23 @@
 #!/bin/bash
+# 1. Install System Dependencies (Required for libsass, lxml, and psycopg)
+# dnf automatically handles x86 vs Graviton (aarch64)
+dnf install -y \
+    gcc \
+    gcc-c++ \
+    python3-devel \
+    postgresql15-devel \
+    libxml2-devel \
+    libxslt-devel \
+    libjpeg-turbo-devel \
+    libpng-devel \
+    zlib-devel
 
-# 1. Base Build Tools (Essential for compiling libsass, lxml, and psycopg)
-yum -y install gcc gcc-c++ python3-devel
+# 2. Activate the Virtual Environment
+VENV=$(find /var/app/venv/ -maxdepth 1 -type d | tail -n 1)
+source "$VENV/bin/activate"
 
-# 2. Database & XML Headers (Required for psycopg2 and lxml)
-yum -y install postgresql-devel libpq-devel libxml2-devel libxslt-devel
-
-# 3. Image & SASS Headers (Required for Pillow and libsass)
-yum -y install libjpeg-turbo-devel libpng-devel libmemcached-devel
-
-# 4. Architecture-specific tweaks
-if lscpu | grep -q "aarch64"; then
-  echo "Graviton detected"
-  yum -y install zlib-devel
-else
-  echo "x86 detected"
-  yum -y install zlib-devel.x86_64
-fi
+# 3. Upgrade Pip/Setuptools to handle Python 3.12/3.13 changes
+pip install --upgrade pip setuptools wheel
 
 # For an Ubuntu Development machine, you need:
 #
